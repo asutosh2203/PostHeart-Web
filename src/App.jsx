@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  getFirestore,
   doc,
   onSnapshot,
   setDoc,
@@ -35,8 +34,6 @@ function App() {
             minute: "2-digit",
           });
         }
-
-        console.log("Firebase data: ", data);
 
         setWidget((prev) => ({
           ...prev,
