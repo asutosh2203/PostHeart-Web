@@ -1,20 +1,31 @@
-import { useEffect, useState } from "react";
-import {
-  doc,
-  onSnapshot,
-  setDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebaseConfig";
+import bunny from "./assets/bunny.jpg";
+import duck_clueless from "./assets/duck_clueless.jpg";
+import duck_rain from "./assets/duck_rain.jpg";
+import duck_wink from "./assets/duck_wink.jpg";
+import mm_hug from "./assets/mm_hug.jpg";
 import "./App.css";
 
 function App() {
   const [note, setNote] = useState("");
   const [status, setStatus] = useState("");
   const [widget, setWidget] = useState({});
+  const [theme, setTheme] = useState("");
+
+  const [widgetBgImg, setWidgetBgImg] = useState("");
 
   // HARDCODE YOUR COUPLE CODE HERE (Since this is just for you)
-  const MY_CODE = "LFEDCD";
+  const MY_CODE = "AGSUUL";
+  // Themes
+  const THEMES = [
+    { id: "duck_wink", color: "#f7cbb0", label: "🐣" },
+    { id: "bunny", color: "#F0D0C1", label: "🐰" },
+    { id: "duck_rain", color: "#D6DBE1", label: "🦆" },
+    { id: "duck_clueless", color: "#FFD6D8", label: "🦢" },
+    { id: "mm_hug", color: "#F7E1C9", label: "🐻" },
+  ];
 
   useEffect(() => {
     if (!MY_CODE) return;
@@ -40,7 +51,30 @@ function App() {
           text: data?.text || "Welcome!",
           sender: data?.sender || "",
           timeString,
+          theme: data?.theme,
         }));
+
+        // set the theme
+        switch (data?.theme) {
+          case "bunny":
+            setWidgetBgImg(`url(${bunny})`);
+            break;
+          case "duck_wink":
+            setWidgetBgImg(`url(${duck_wink})`);
+            break;
+          case "duck_rain":
+            setWidgetBgImg(`url(${duck_rain})`);
+            break;
+          case "duck_clueless":
+            setWidgetBgImg(`url(${duck_clueless})`);
+            break;
+          case "mm_hug":
+            setWidgetBgImg(`url(${mm_hug})`);
+            break;
+
+          default:
+            break;
+        }
       }
     });
 
@@ -52,15 +86,27 @@ function App() {
     setStatus("Sending...");
 
     try {
-      await setDoc(
-        doc(db, "couples", MY_CODE),
-        {
-          text: note,
-          timestamp: serverTimestamp(),
-          sender: "— Asutosh",
-        },
-        { merge: true }
-      );
+      if (theme !== "")
+        await setDoc(
+          doc(db, "couples", MY_CODE),
+          {
+            text: note,
+            timestamp: serverTimestamp(),
+            sender: "— Asutosh",
+            theme,
+          },
+          { merge: true }
+        );
+      else
+        await setDoc(
+          doc(db, "couples", MY_CODE),
+          {
+            text: note,
+            timestamp: serverTimestamp(),
+            sender: "— Asutosh",
+          },
+          { merge: true }
+        );
 
       setNote("");
       setStatus("Sent! 💖");
@@ -75,7 +121,15 @@ function App() {
       <h1>PostHeart Web 💌</h1>
       <p>Sending to Gul (Code: {MY_CODE})</p>
 
-      <div className="widget">
+      <div
+        className="widget"
+        style={{
+          backgroundImage: widgetBgImg,
+          backgroundSize: "cover", // Fill container
+          backgroundPosition: "center", // Center subject
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <div className="widget_header">💖 Post Heart</div>
         <hr />
         <div className="widget_body">"{widget?.text}"</div>
@@ -91,6 +145,27 @@ function App() {
         placeholder="Type a note..."
         className="note-field"
       />
+
+      <div className="theme_picker">
+        {THEMES.map((t) => {
+          return (
+            <div
+              key={t.id}
+              id={t.id}
+              style={{ background: `${t.color}` }}
+              className={`theme_select ${t.id === theme && " selected"}`}
+              onClick={() => {
+                setTheme((prev) => {
+                  console.log("setting theme to", t.id);
+                  return t.id;
+                });
+              }}
+            >
+              {t.label}
+            </div>
+          );
+        })}
+      </div>
 
       <button onClick={sendNote} className="send-btn">
         SEND NOTE
