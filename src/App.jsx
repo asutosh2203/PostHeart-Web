@@ -94,6 +94,7 @@ function App() {
             timestamp: serverTimestamp(),
             sender: "— Asutosh",
             theme,
+            type: "text",
           },
           { merge: true }
         );
