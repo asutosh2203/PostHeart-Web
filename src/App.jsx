@@ -105,6 +105,7 @@ function App() {
             text: note,
             timestamp: serverTimestamp(),
             sender: "— Asutosh",
+            type: "text",
           },
           { merge: true }
         );
